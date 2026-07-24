@@ -1,0 +1,61 @@
+{
+  "event": {
+    "type": "schema_field_renamed",
+    "dataset_urn": "urn:li:dataset:(urn:li:dataPlatform:postgres,raw.users,PROD)",
+    "timestamp": 1760000000000,
+    "changes": [
+      {
+        "field_path": "user_id",
+        "previous_name": "user_id",
+        "new_name": "account_id",
+        "field_type": "INTEGER",
+        "nullable": false
+      }
+    ],
+    "downstream_urns": [
+      "urn:li:dataset:(urn:li:dataPlatform:dbt,analytics.dim_users,PROD)",
+      "urn:li:dataset:(urn:li:dataPlatform:dbt,analytics.fct_orders,PROD)"
+    ]
+  },
+  "remediation_tag": {
+    "graphql_mutation": "addTag",
+    "variables": {
+      "input": {
+        "tagUrn": "urn:li:tag:STATUS:FIX_PENDING_PR_42",
+        "resourceUrn": "urn:li:dataset:(urn:li:dataPlatform:postgres,raw.users,PROD)"
+      }
+    },
+    "description": "Tags the dataset to signal that a fix PR is open and pending review."
+  },
+  "incident_link": {
+    "rest_endpoint": "/api/entities/v1",
+    "method": "POST",
+    "payload": {
+      "entityType": "dataset",
+      "entityUrn": "urn:li:dataset:(urn:li:dataPlatform:postgres,raw.users,PROD)",
+      "aspect": {
+        "institutionalMemory": {
+          "elements": [
+            {
+              "url": "https://github.com/owner/repo/pull/42",
+              "description": "Remediation PR for schema breaking change — https://github.com/owner/repo/pull/42",
+              "label": "Remediation PR",
+              "note": "{\"pr_url\": \"https://github.com/owner/repo/pull/42\", \"status\": \"fix_pending\"}",
+              "createdBy": "urn:li:corpuser:datahub-sentinel"
+            }
+          ]
+        }
+      }
+    },
+    "description": "Attaches an institutional memory element linking to the fix PR."
+  },
+  "summary": {
+    "dataset": "urn:li:dataset:(urn:li:dataPlatform:postgres,raw.users,PROD)",
+    "tag_applied": "STATUS: FIX_PENDING_PR_42",
+    "pr_url": "https://github.com/owner/repo/pull/42",
+    "downstream_notified": [
+      "urn:li:dataset:(urn:li:dataPlatform:dbt,analytics.dim_users,PROD)",
+      "urn:li:dataset:(urn:li:dataPlatform:dbt,analytics.fct_orders,PROD)"
+    ]
+  }
+}

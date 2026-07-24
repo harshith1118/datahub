@@ -1,0 +1,4 @@
+acryl-datahub
+pygithub
+typer
+pydantic

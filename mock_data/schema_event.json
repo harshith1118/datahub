@@ -1,0 +1,18 @@
+{
+  "event_type": "schema_field_renamed",
+  "dataset_urn": "urn:li:dataset:(urn:li:dataPlatform:postgres,raw.users,PROD)",
+  "timestamp": 1760000000000,
+  "changes": [
+    {
+      "field_path": "user_id",
+      "previous_name": "user_id",
+      "new_name": "account_id",
+      "field_type": "INTEGER",
+      "nullable": false
+    }
+  ],
+  "downstream_urns": [
+    "urn:li:dataset:(urn:li:dataPlatform:dbt,analytics.dim_users,PROD)",
+    "urn:li:dataset:(urn:li:dataPlatform:dbt,analytics.fct_orders,PROD)"
+  ]
+}

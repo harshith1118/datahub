@@ -1,0 +1,23 @@
+{
+  "agent": {
+    "agent_file": "AGENTS.md"
+  },
+  "commands": [
+    {
+      "name": "remediate",
+      "description": "Auto-remediate a broken SQL file: fetch schema diff, fix column refs, open a GitHub PR, write back DataHub tag.",
+      "file": ".opencode/commands/remediate.md"
+    }
+  ],
+  "mcpServers": {
+    "datahub": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["-m", "datahub.mcp.server"],
+      "env": {
+        "DATAHUB_GMS_URL": "${DATAHUB_GMS_URL}",
+        "DATAHUB_TOKEN": "${DATAHUB_TOKEN}"
+      }
+    }
+  }
+}

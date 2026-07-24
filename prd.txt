@@ -1,0 +1,144 @@
+
+
+# 📄 Product Requirement Document (PRD)
+
+## Project Title: **DataHub Auto-Remediate & Sync Agent ("DataHub-Sentinel")**
+
+**Hackathon Track:** [Agents That Do Real Work](https://datahub.devpost.com/)
+
+**Target Platform:** [Build with DataHub: The Agent Hackathon](https://datahub.devpost.com/) ($20,500 Prize Pool)
+
+---
+
+## 1. Executive Summary
+
+When raw database schemas change in production (e.g., column renames or deletions), downstream data pipelines (dbt models, Airflow DAGs) break quietly. **DataHub-Sentinel** is an autonomous AI agent that monitors DataHub for schema diffs, analyzes downstream lineage, uses OpenCode to write a Git fix (Pull Request), and writes the resolution status back to the DataHub metadata graph.
+
+---
+
+## 2. Core Technical Architecture
+
+```
+┌─────────────────┐       1. Fetch Schema & Lineage       ┌──────────────────────┐
+│   DataHub GMS   │ ───────────────────────────────────>  │  Sentinel Agent Core │
+│ (MCP / GraphQL) │ <───────────────────────────────────  │   (Python / Typer)   │
+└─────────────────┘       4. Write-Back Status Tag        └──────────┬───────────┘
+                                                                     │
+                                                                     │ 2. Prompt Code
+                                                                     │    Refactor
+                                                                     ▼
+┌─────────────────┐       3. Push Branch & Create PR      ┌──────────────────────┐
+│  GitHub Repo    │ <───────────────────────────────────  │    OpenCode CLI      │
+│  (Target Code)  │                                       │ (Automated Refactor) │
+└─────────────────┘                                       └──────────────────────┘
+
+```
+
+---
+
+## 3. Features & User Stories
+
+### Feature A: DataHub Context Ingestion
+
+* **User Story:** As an agent, I query DataHub’s MCP server or Python SDK to get schema drift events and downstream dbt/Airflow dependencies.
+* **Requirements:**
+* Connect to DataHub GMS using API token or local Docker instance.
+* Query dataset schema versions and upstream/downstream lineage edges.
+
+
+
+### Feature B: Automated Code Refactoring
+
+* **User Story:** As an agent, I pass broken SQL files and schema diffs to OpenCode to automatically fix broken column names.
+* **Requirements:**
+* Scan local repo directory for `.sql` (dbt) or `.py` (Airflow) files.
+* Pass the exact schema breaking change to OpenCode via CLI `/init` or non-interactive prompt mode.
+* Refactor code without breaking business logic.
+
+
+
+### Feature C: GitHub Pull Request Automation
+
+* **User Story:** As an engineer, I want the agent to automatically submit a clean GitHub PR with the code fixes.
+* **Requirements:**
+* Create a new branch (`git checkout -b fix/datahub-schema-remediation`).
+* Commit changes and open a PR via PyGithub/GitHub CLI.
+
+
+
+### Feature D: DataHub Graph Write-Back *(Crucial for Winning!)*
+
+* **User Story:** As a data team, I want DataHub updated so everyone knows a fix is pending.
+* **Requirements:**
+* Add a dataset tag/glossary term in DataHub: `STATUS: FIX_PENDING_PR_#42`.
+* Add an operational incident report link pointing to the GitHub PR.
+
+
+
+---
+
+## 4. Repo Structure to Generate
+
+```text
+datahub-sentinel/
+├── .opencode/
+│   └── commands/
+│       └── remediate.md       # Custom OpenCode prompt command
+├── AGENTS.md                   # Instructions for OpenCode about project structure
+├── .opencode.json              # OpenCode MCP configuration
+├── src/
+│   ├── datahub_client.py       # DataHub MCP / SDK wrapper (Read & Write back)
+│   ├── github_client.py        # PyGithub logic for opening PRs
+│   └── main.py                 # CLI controller (Typer)
+├── mock_data/
+│   ├── broken_dbt_model.sql    # Sample dbt model with outdated column
+│   └── schema_event.json       # Simulated breaking schema change
+├── examples/                   # For Judges
+│   ├── sample_pr_diff.patch
+│   └── datahub_writeback.json
+├── LICENSE                     # MUST BE Apache 2.0
+├── README.md                   # Installation & Demo Guide
+└── requirements.txt
+
+```
+
+---
+
+## 5. Master Prompt for OpenCode ("Vibe Code" Instructions)
+
+To let OpenCode build this project for you, copy and paste the prompt below directly into your terminal or OpenCode session:
+
+> **OpenCode Prompt:**
+> *"Create a complete Python CLI project called `datahub-sentinel` under the Apache 2.0 license.
+> 1. Set up `requirements.txt` with `acryl-datahub`, `pygithub`, `typer`, `pydantic`.
+> 2. Create `src/datahub_client.py` using `datahub.emitter.mcp_builder` to fetch dataset lineage and write back tags like `Remediation_Pending` to DataHub entities.
+> 3. Create `src/github_client.py` using PyGithub to git commit changed `.sql` files and open a Pull Request.
+> 4. Create an `AGENTS.md` file explaining the architecture so you can run automated tasks.
+> 5. Create `mock_data/broken_dbt_model.sql` and `src/main.py` CLI that ties the workflow together: read broken file -> fix column reference -> submit PR -> update DataHub tag."*
+> 
+> 
+
+---
+
+## 6. Official Resources & References
+
+### 🛠️ Hackathon Links
+
+* **Hackathon Page:** [Build with DataHub: The Agent Hackathon](https://datahub.devpost.com/)
+* **Hackathon Resources:** [DataHub SDKs & Starter Kits](https://datahub.devpost.com/resources)
+* **Submission Deadline:** **August 11, 2026** (2:30 AM GMT+5:30)
+* **Rules & Requirements:** [Devpost Official Rules](https://datahub.devpost.com/rules)
+
+### 🔌 Tech Stack Docs
+
+* **DataHub MCP Server / SDK:** [DataHub Agent Context Docs](https://datahub.com/blog/build-with-datahub-agent-hackathon/)
+* **OpenCode Documentation:** [OpenCode AI Docs](https://opencode.ai/docs/)
+* **OpenCode Agent Setup:** [Configuring `AGENTS.md` & MCP](https://opencode.ai/docs/agents/)
+
+---
+
+## 7. Judge Submission Checklist
+
+* [ ] **Public Repo:** Apache 2.0 License included at repo root.
+* [ ] **Video:** $<3$ minute YouTube video showing DataHub schema change $\rightarrow$ OpenCode PR creation $\rightarrow$ DataHub tag update.
+* [ ] **Examples Folder:** Pre-generated PR diffs and DataHub write-back JSON payload saved in `/examples`.
